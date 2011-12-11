@@ -37,7 +37,7 @@ Usage
 
 Create a ``fabfile.py`` file in your project root::
 
-    from fab_bundle import env, task, bootstrap, deploy, destroy
+    from fab_bundle import env, task, bootstrap, deploy, destroy, ssh
 
     @task
     def production():
@@ -69,8 +69,17 @@ to the server and updates or creates the bundle's environment and layout.
 For subsequent deploys you don't need to run ``bootstrap`` again, although
 doing so is harmless.
 
+Should you ever need a plain shell, do::
+
+    fab production ssh
+
 Configuration
 -------------
+
+Bundle location
+```````````````
+
+Bundles are put in ``$HOME/bundles`` by default. To change this, put
 
 Sentry
 ``````
@@ -79,8 +88,10 @@ You can use Sentry in remote mode, by adding this to the ``env`` object::
 
     def production():
         # ...
-        env.sentry_url = 'https://sentry.example.com/store/'
-        env.sentry_key = 'your private secret sentry key'
+        env.sentry = {
+            'key': 'your private secret sentry key',
+            'url': 'https://sentry.example.com/store/',
+        }
 
 Sending Email
 `````````````
@@ -96,7 +107,8 @@ Sending Email
             'password': 'yay',
         }
 
-You can also set the ``'tls'``, ``'port'`` and ``'backend'`` keys.
+You can also set the ``'tls'``, ``'port'`` and ``'backend'`` keys. You can use
+localhost if you want, ``postfix`` is installed.
 
 Migrations
 ``````````
