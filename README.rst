@@ -93,6 +93,9 @@ You can use Sentry in remote mode, by adding this to the ``env`` object::
             'url': 'https://sentry.example.com/store/',
         }
 
+Make sure your project itself is configured with ``raven`` or
+``sentry.client``.
+
 Sending Email
 `````````````
 
