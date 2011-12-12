@@ -50,6 +50,7 @@ Create a ``fabfile.py`` file in your project root::
         # Nginx
         env.http_host = 'foo.example.com'
         env.ssl_cert = '/path/to/ssl_cert.crt'
+        env.ssl_key = '/path/to/ssl_cert_key.key'
 
         # Django
         env.base_settings = 'project.default_settings'
