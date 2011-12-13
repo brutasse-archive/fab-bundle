@@ -4,6 +4,24 @@ Fab-bundle
 A standard stack for Django, using python packaging and Fabric for single-line
 deployments on Debian/Ubuntu machines.
 
+A "bundle" is like an app on ep.io, or an instance on gondor.io. You can
+deploy as many bundles as you want on a single machine.
+
+This isn't intended for large-scale deployment but rather small sites fitting
+on a single server (although you can scale vertically).
+
+Almost everything here is implemented, a couple of things are still missing:
+
+* Celery
+* Nashvegas migrations
+* ``vendor/`` packages
+* Cron tasks
+* Bundle destruction
+* Log rotation
+* Daily DB snapshots
+* Symlinks for easy backups
+* Debian squeeze support (postgres 8.4, meh)
+
 Stack
 -----
 
@@ -148,13 +166,13 @@ sessions. To add more tasks::
     def production():
         # ...
         env.cron = (
-            '*/30 * * * * MANAGEMENT_COMMAND command_name',
+            '*/30 * * * * django-admin.py command_name',
             '*/10 * * * * /path/to/stuff/to/do',
         )
 
-If you need to run a management command, just put ``MANAGEMENT_COMMAND``
-followed by your command name and options and it'll be translated to a full
-``django-admin.py`` command.
+If you need to run a management command, just put ``django-admin.py``
+followed by your command name and options and it'll be translated to the path
+of the real ``django-admin.py`` command.
 
 Private index server
 ````````````````````
