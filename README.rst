@@ -12,6 +12,7 @@ on a single server (although you can scale vertically).
 
 Almost everything here is implemented, a couple of things are still missing:
 
+* Actual pip-installability
 * Celery
 * Nashvegas migrations
 * ``vendor/`` packages
