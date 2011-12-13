@@ -1,0 +1,2 @@
+#! /bin/sh
+/sbin/iptables-restore --table=nat < /home/{{ user }}/conf/iptables.rules
