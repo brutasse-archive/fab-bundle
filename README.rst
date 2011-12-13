@@ -2,7 +2,7 @@ Fab-bundle
 ==========
 
 A standard stack for Django, using python packaging and Fabric for single-line
-deployments on Debian machines.
+deployments on Debian/Ubuntu machines.
 
 Stack
 -----
@@ -80,7 +80,12 @@ Configuration
 Bundle location
 ```````````````
 
-Bundles are put in ``$HOME/bundles`` by default. To change this, put
+Bundles are put in ``$HOME/bundles`` by default. To change this, set
+``bundle_root``::
+
+    def production():
+        # ...
+        env.bundle_root = '/var/www/bundles'
 
 Sentry
 ``````
