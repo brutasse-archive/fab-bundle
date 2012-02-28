@@ -2,6 +2,7 @@
 Provisioning tasks
 """
 from fabric.api import env, run, sudo, task
+from fabric.context_managers import settings
 from fabric.contrib.files import exists
 
 from .utils import template, mkdir, die, err, btw, yay
@@ -62,6 +63,8 @@ def packages():
     """
     sudo('apt-get update')
     sudo('apt-get -y upgrade')
+    if not 'pg_version' in env:
+        env.pg_version = '9.1'
     packages = [
         'build-essential',
         'libjpeg62-dev',
@@ -76,15 +79,17 @@ def packages():
 
         'libpq-dev',
         'postgresql',
-        'postgresql-server-dev-9.1',
+        'postgresql-server-dev-%s' % env.pg_version,
 
         'postgis',
-        'postgresql-9.1-postgis',
+        'postgresql-%s-postgis' % env.pg_version,
         'gdal-bin',
         'libproj-dev',
         'libgeos-dev',
 
         'redis-server',
+
+        'curl',
     ]
     sudo('apt-get -y install %s' % ' '.join(packages))
 
@@ -124,9 +129,10 @@ def nginx():
     """
     Make sure nginx is started by default.
     """
-    res = sudo('/etc/init.d/nginx status')
-    if 'could not access PID file' in res:
-        sudo('/etc/init.d/nginx start')
+    with settings(warn_only=True):
+        res = sudo('/etc/init.d/nginx status')
+        if 'could not access PID file' in res:
+            sudo('/etc/init.d/nginx start')
 
 
 def supervisor():
