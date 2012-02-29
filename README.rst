@@ -113,13 +113,9 @@ You can use Sentry in remote mode, by adding this to the ``env`` object::
 
     def production():
         # ...
-        env.sentry = {
-            'key': 'your private secret sentry key',
-            'url': 'https://sentry.example.com/store/',
-        }
+        env.sentry_dsn = 'you sentry DSN'
 
-Make sure your project itself is configured with ``raven`` or
-``sentry.client``.
+Make sure your project itself is configured to use ``raven``.
 
 Sending Email
 `````````````

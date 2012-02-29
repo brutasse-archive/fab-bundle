@@ -69,14 +69,8 @@ DATABASES = {
     }
 }
 
-{% if sentry %}
-SENTRY_KEY = '{{ sentry.key }}'
-SENTRY_SERVERS = [
-    '{{ sentry.url }}',
-]
-SENTRY_ADMINS = ({% for admin in admins %}
-    '{{ admin }}',{% endfor %}
-)
+{% if sentry_dsn %}
+SENTRY_DSN = '{{ sentry_dsn }}'
 {% endif %}
 
 {% if email %}
