@@ -44,10 +44,12 @@ def deploy(force_version=None):
     run(cmd)
     env.path = bundle_root
     python = run('ls %s/env/lib' % bundle_root)
-    template('path_extension.pth',
-             '%s/env/lib/%s/site-packages/_virtualenv_path_extensions.pth' % (
-                 bundle_root, python
-             ))
+    template(
+        'path_extension.pth',
+        '%s/env/lib/%s/site-packages/_virtualenv_path_extensions.pth' % (
+            bundle_root, python
+        ),
+    )
 
     env.media_root = bundle_root + '/public/media'
     env.static_root = bundle_root + '/public/static'

@@ -12,7 +12,6 @@ on a single server (although you can scale vertically).
 
 Almost everything here is implemented, a couple of things are still missing:
 
-* Actual pip-installability
 * Celery
 * Nashvegas migrations
 * ``vendor/`` packages
@@ -52,6 +51,7 @@ Usage
 
 ::
 
+    pip install ssh
     pip install https://github.com/brutasse/fab-bundle/tarball/master#egg=fab-bundle
 
 Create a ``fabfile.py`` file in your project root::
