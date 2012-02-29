@@ -20,7 +20,6 @@ Almost everything here is implemented, a couple of things are still missing:
 * Log rotation
 * Daily DB snapshots
 * Symlinks for easy backups
-* Debian squeeze support (postgres 8.4, meh)
 
 Stack
 -----
@@ -133,6 +132,19 @@ Sending Email
 
 You can also set the ``'tls'``, ``'port'`` and ``'backend'`` keys. You can use
 localhost if you want, ``postfix`` is installed.
+
+Postgres version
+````````````````
+
+Fab-bundle will try to install postgres 9.1. If it's not available on your
+system, you'll need to check which version you have, make sure you pick the
+one that works with postgis as well::
+
+    apt-cache search postgis
+
+This outputs stuff like ``postgresql-8.4-postgis``. Then set::
+
+    env.pg_version = '8.4'
 
 Migrations
 ``````````
