@@ -76,11 +76,17 @@ def deploy(force_version=None):
     if env.staticfiles:
         manage('collectstatic')
 
-    # TODO: session_cleanup command
-    # TODO: cron tasks
+    # Some things don't like dots
+    env.app = env.http_host.replace('.', '')
+
+    # Cron tasks
+    if 'cron' in env:
+        template('cron', '%(bundle_root)s/conf/cron' % env, use_sudo=True)
+        sudo('chown root:root %(bundle_root)s/conf/cron' % env)
+        sudo('chmod 644 %(bundle_root)s/conf/cron' % env)
+        sudo('ln -sf %(bundle_root)s/conf/cron /etc/cron.d/%(app)s' % env)
 
     # Nginx vhost
-    env.app = env.http_host.replace('.', '')
     template('nginx.conf', '%s/conf/nginx.conf' % bundle_root)
     with cd('/etc/nginx/sites-available'):
         sudo('ln -sf %s/conf/nginx.conf %s.conf' % (bundle_root,

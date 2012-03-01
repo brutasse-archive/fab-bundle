@@ -15,7 +15,6 @@ Almost everything here is implemented, a couple of things are still missing:
 * Celery
 * Nashvegas migrations
 * ``vendor/`` packages
-* Cron tasks
 * Bundle destruction
 * Log rotation
 * Daily DB snapshots
@@ -190,19 +189,21 @@ They're enabled by default. To disable them::
 Cron tasks
 ``````````
 
-The ``session_cleanup`` task is enabled by default if your project uses
-sessions. To add more tasks::
+To add scheduled tasks::
 
     def production():
         # ...
         env.cron = (
-            '*/30 * * * * django-admin.py command_name',
-            '*/10 * * * * /path/to/stuff/to/do',
+            ('*/30 * * * *', './env/bin/django-admin.py command_name --settings=settings'),
         )
 
-If you need to run a management command, just put ``django-admin.py``
-followed by your command name and options and it'll be translated to the path
-of the real ``django-admin.py`` command.
+Commands are run from your bundle root. This folder contains:
+
+* the virtualenv in ``env/``
+* the nginx, supervisor, etc config in ``conf/``
+* the nginx and gunicorn logs in ``logs/``
+* the static and media files in ``public/``
+* the settings and wsgi files, ``settings.py`` and ``wsgi.py``
 
 Private index server
 ````````````````````

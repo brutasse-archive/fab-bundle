@@ -1,0 +1,2 @@
+{% for schedule, command in cron %}{{ schedule }} {{ user }} cd {{ bundle_root }} && {{ command }}
+{% endfor %}
