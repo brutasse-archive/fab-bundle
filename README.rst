@@ -84,6 +84,14 @@ to the server and updates or creates the bundle's environment and layout.
 For subsequent deploys you don't need to run ``bootstrap`` again, although
 doing so is harmless.
 
+To deploy a specific version (for instance for rolling back), add your version
+number as an argument::
+
+    fab production deploy:1.1.2
+
+Note that this will **not** re-upload the package if it's already been
+uploaded.
+
 Should you ever need a plain shell, do::
 
     fab production ssh

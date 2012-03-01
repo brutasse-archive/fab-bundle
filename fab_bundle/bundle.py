@@ -21,9 +21,12 @@ def deploy(force_version=None):
     run('%s/env/bin/pip install -U pip' % bundle_root)
 
     local('python setup.py sdist')
-    dists = os.listdir(os.path.join(os.getcwd(), 'dist'))
-    dist = [d for d in sorted(dists) if d.endswith('.tar.gz')][-1]
-    version = force_version or dist.split('-')[-1][:-7]
+    dists = [
+        d for d in os.listdir(os.path.join(os.getcwd(),
+                                           'dist')) if d.endswith('.tar.gz')
+    ]
+    dist = sorted(dists, key=lambda d: d.rsplit('-', 1)[1][:-7].split('.'))[-1]
+    version = force_version or dist.rsplit('-', 1)[1][:-7]
     requirement = dist.replace('-%s.tar.gz' % version, '==%s' % version)
 
     run('mkdir -p packages')
