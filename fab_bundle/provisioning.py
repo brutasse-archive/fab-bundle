@@ -70,6 +70,8 @@ def packages():
         'libjpeg62-dev',
         'python-dev',
         'python-virtualenv',
+        'libxml2-dev',
+        'libxslt-dev',
 
         'postfix',
 
