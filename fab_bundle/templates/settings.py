@@ -19,7 +19,7 @@ TEMPLATE_LOADERS = (
     )),
 )
 
-BASE_URL = 'https://{{ http_host }}'
+BASE_URL = 'http{% if ssl_cert %}s{% endif %}://{{ http_host }}'
 MEDIA_ROOT = '{{ media_root }}'
 MEDIA_URL = BASE_URL + '/media/'
 
@@ -84,6 +84,6 @@ EMAIL_HOST = '{{ email.host }}'
 {% if email.tls %}EMAIL_USE_TLS = True{% endif %}
 {% endif %}
 
+SESSION_COOKIE_HTTPONLY = True{% if ssl_cert %}
 SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True{% endif %}

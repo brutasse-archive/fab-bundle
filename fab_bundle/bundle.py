@@ -18,13 +18,13 @@ def deploy(force_version=None):
     # virtualenv, Packages
     if not exists(bundle_root + '/env'):
         run('virtualenv --no-site-packages %s/env' % bundle_root)
+    run('%s/env/bin/pip install -U pip' % bundle_root)
 
     local('python setup.py sdist')
     dists = os.listdir(os.path.join(os.getcwd(), 'dist'))
     dist = [d for d in sorted(dists) if d.endswith('.tar.gz')][-1]
     version = force_version or dist.split('-')[-1][:-7]
     requirement = dist.replace('-%s.tar.gz' % version, '==%s' % version)
-    print requirement
 
     run('mkdir -p packages')
     if not exists('packages/%s' % dist):
@@ -36,7 +36,7 @@ def deploy(force_version=None):
         die("%s is already deployed. Increment the version number to deploy "
             "a new release." % requirement)
 
-    cmd = '%s/env/bin/pip install %s gunicorn --find-links file://%s' % (
+    cmd = '%s/env/bin/pip install -U %s gunicorn --find-links file://%s' % (
         bundle_root, requirement, run('pwd') + '/packages'
     )
     if 'index_url' in env:
@@ -84,8 +84,9 @@ def deploy(force_version=None):
                                                     env.http_host))
     with cd('/etc/nginx/sites-enabled'):
         sudo('ln -sf ../sites-available/%s.conf' % env.http_host)
-    put(env.ssl_cert, '%s/conf/ssl.crt' % bundle_root)
-    put(env.ssl_key, '%s/conf/ssl.key' % bundle_root)
+    if 'ssl_cert' in env and 'ssl_key' in env:
+        put(env.ssl_cert, '%s/conf/ssl.crt' % bundle_root)
+        put(env.ssl_key, '%s/conf/ssl.key' % bundle_root)
     sudo('/etc/init.d/nginx reload')
 
     # Supervisor task(s) -- gunicorn + celeryd
@@ -100,7 +101,8 @@ def deploy(force_version=None):
     ip = run('curl http://ifconfig.me/')
     dns = run('nslookup %s' % env.http_host)
     if ip in dns:
-        yay("Visit https://%s" % env.http_host)
+        proto = 'https' if 'ssl_cert' in env else 'http'
+        yay("Visit %s://%s" % (proto, env.http_host))
     else:
         err("Deployment successful but make sure %s points to %s" % (
             env.http_host, ip))

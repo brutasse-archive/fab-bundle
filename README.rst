@@ -33,10 +33,8 @@ Stack
 * SSL
 * Sentry, using a remote sentry server
 * GIS-ready by default
+* HTTPS handling
   
-HTTPS is enabled and enforced. Standard HTTP is not supported, this is a
-feature. If you run several bundles on the same server, SNI is good enough.
-
 Usage
 -----
 
@@ -67,8 +65,6 @@ Create a ``fabfile.py`` file in your project root::
 
         # Nginx
         env.http_host = 'foo.example.com'
-        env.ssl_cert = '/path/to/ssl_cert.crt'
-        env.ssl_key = '/path/to/ssl_cert_key.key'
 
         # Django
         env.base_settings = 'project.default_settings'
@@ -94,6 +90,23 @@ Should you ever need a plain shell, do::
 
 Configuration
 -------------
+
+HTTPS
+`````
+
+Fab-bundle checks for the presence of ``ssl_key`` and ``ssl_cert`` in
+``env``::
+
+        env.ssl_cert = '/path/to/ssl_cert.crt'
+        env.ssl_key = '/path/to/ssl_cert_key.key'
+
+Just set them to local files on your machine and your site will be configured
+to be HTTPS-only, with:
+
+* HSTS support
+* Secure session and CSRF cookies
+* Permanent redirection from non-SSL to SSL requests
+* HTTPS on static and media serving
 
 Bundle location
 ```````````````
