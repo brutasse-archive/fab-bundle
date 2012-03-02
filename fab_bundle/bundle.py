@@ -25,8 +25,15 @@ def deploy(force_version=None):
         d for d in os.listdir(os.path.join(os.getcwd(),
                                            'dist')) if d.endswith('.tar.gz')
     ]
-    dist = sorted(dists, key=lambda d: d.rsplit('-', 1)[1][:-7].split('.'))[-1]
-    version = force_version or dist.rsplit('-', 1)[1][:-7]
+    version_string = lambda d: d.rsplit('-', 1)[1][:-7]
+    def int_or_s(num):
+        try:
+            return int(num)
+        except ValueError:
+            return num
+    dist = sorted(dists, key=lambda d: map(int_or_s,
+                                           version_string(d).split('.')))[-1]
+    version = force_version or version_string(dist)
     requirement = dist.replace('-%s.tar.gz' % version, '==%s' % version)
 
     run('mkdir -p packages')
