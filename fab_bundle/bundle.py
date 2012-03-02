@@ -92,6 +92,9 @@ def deploy(force_version=None):
         sudo('chown root:root %(bundle_root)s/conf/cron' % env)
         sudo('chmod 644 %(bundle_root)s/conf/cron' % env)
         sudo('ln -sf %(bundle_root)s/conf/cron /etc/cron.d/%(app)s' % env)
+    else:
+        # Make sure to deactivate tasks if the cron section is removed
+        sudo('rm -f %(bundle_root)s/conf/cron /etc/cron.d/%(app)s' % env)
 
     # Nginx vhost
     template('nginx.conf', '%s/conf/nginx.conf' % bundle_root)
