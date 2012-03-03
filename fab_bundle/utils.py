@@ -1,12 +1,14 @@
 import os
+import random
 import re
+import string
 import sys
 import unicodedata
 
 from fabric.api import env, run, sudo, task
 from fabric.colors import red, green, blue
 from fabric.utils import abort
-from fabric.contrib.files import upload_template
+from fabric.contrib.files import upload_template, exists
 
 
 def fyi(msg):
@@ -54,13 +56,33 @@ def mkdir(directory, use_sudo=False):
 
 def template(source, destination, use_sudo=False):
     """
-    Uploads a Jinja template with env as context.
+    Uploads a Jinja template with env as context, and returns True
+    if the file has changed.
     """
     here = os.path.abspath(os.path.dirname(__file__))
     template_dir = os.path.join(here, 'templates')
+
+    new_file = not exists(destination, use_sudo=use_sudo)
+
+    if not new_file:
+        chars = [random.choice(string.ascii_letters) for i in range(5)]
+        final_destination = destination
+        destination = '/tmp/%s' % "".join(chars)
     upload_template(source, destination, context=env, backup=False,
                     use_jinja=True, template_dir=template_dir,
                     use_sudo=use_sudo)
+    if new_file:
+        return True
+
+    cmd = sudo if use_sudo else run
+    out = cmd('diff -u %s %s || true' % (final_destination, destination))
+    if out:
+        cmd('mv %s %s' % (destination, final_destination))
+        return True
+
+    assert destination.startswith('/tmp')
+    cmd('rm %s' % destination)
+    return False
 
 
 @task()

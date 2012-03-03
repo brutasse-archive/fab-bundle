@@ -47,8 +47,9 @@ def iptables():
     conf = '/home/%(user)s/conf' % env
     mkdir(conf)
     iptables_conf = conf + '/iptables.rules'
-    template('iptables.rules', iptables_conf)
-    sudo('/sbin/iptables-restore --table=nat < %s' % iptables_conf)
+    changed = template('iptables.rules', iptables_conf)
+    if changed:
+        sudo('/sbin/iptables-restore --table=nat < %s' % iptables_conf)
 
     # Automate for reboots
     pre_up = '/etc/network/if-pre-up.d/iptables'
@@ -103,11 +104,8 @@ def postgres():
     pg_version = run('ls /etc/postgresql').split()[0]
     pg_hba = '/etc/postgresql/%s/main/pg_hba.conf' % pg_version
 
-    # Lazy: overwrite only if changed
-    template('pg_hba.conf', '/tmp/pg_hba.conf')
-    out = sudo('diff -u /tmp/pg_hba.conf %s || true' % pg_hba)
-    run('rm /tmp/pg_hba.conf')
-    if out:
+    changed = template('pg_hba.conf', pg_hba, use_sudo=True)
+    if changed:
         btw("Updated pg_hba.conf, reloading postgres...")
         template('pg_hba.conf', pg_hba, use_sudo=True)
         sudo('/etc/init.d/postgresql restart')
