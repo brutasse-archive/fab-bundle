@@ -97,7 +97,7 @@ def deploy(force_version=None):
         sudo('rm -f %(bundle_root)s/conf/cron /etc/cron.d/%(app)s' % env)
 
     # Nginx vhost
-    template('nginx.conf', '%s/conf/nginx.conf' % bundle_root)
+    changed = template('nginx.conf', '%s/conf/nginx.conf' % bundle_root)
     with cd('/etc/nginx/sites-available'):
         sudo('ln -sf %s/conf/nginx.conf %s.conf' % (bundle_root,
                                                     env.http_host))
@@ -106,14 +106,17 @@ def deploy(force_version=None):
     if 'ssl_cert' in env and 'ssl_key' in env:
         put(env.ssl_cert, '%s/conf/ssl.crt' % bundle_root)
         put(env.ssl_key, '%s/conf/ssl.key' % bundle_root)
-    sudo('/etc/init.d/nginx reload')
+    if changed:  # TODO detect if the certs have changed
+        sudo('/etc/init.d/nginx reload')
 
     # Supervisor task(s) -- gunicorn + celeryd
-    template('supervisor.conf', '%s/conf/supervisor.conf' % bundle_root)
+    changed = template('supervisor.conf',
+                       '%s/conf/supervisor.conf' % bundle_root)
     with cd('/etc/supervisor/conf.d'):
         sudo('ln -sf %s/conf/supervisor.conf %s.conf' % (bundle_root,
                                                          bundle_name))
-    sudo('supervisorctl update')
+    if changed:
+        sudo('supervisorctl update')
     run('kill -HUP `pgrep gunicorn`')
 
     # All set, user feedback
