@@ -87,3 +87,5 @@ EMAIL_HOST = '{{ email.host }}'
 SESSION_COOKIE_HTTPONLY = True{% if ssl_cert %}
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True{% endif %}
+
+{% if settings %}{{ settings|safe }}{% endif %}

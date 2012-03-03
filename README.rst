@@ -227,6 +227,23 @@ Celery support (via Redis) is opt-in::
         # ...
         env.celery = True
 
+Custom settings
+```````````````
+
+If you need custom settings that are only suited to your production
+environment, set them as a string in ``env.settings``::
+
+    from textwrap import dedent
+
+    def production():
+        # ...
+        env.settings = dedent("""
+            REGISTRATION_OPEN = True
+        """).strip()
+
+Make sure there is no indentation, the code must be valid top-level python
+code. Custom settings are appended to the default ones.
+
 Rolling back
 ------------
 
