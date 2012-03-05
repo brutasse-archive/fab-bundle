@@ -29,11 +29,10 @@ Stack
 * Gunicorn
 * Supervisor
 * Nginx
-* SSL
 * Sentry, using a remote sentry server
 * GIS-ready by default
-* HTTPS handling
-  
+* HTTPS handling with A grade from ssllabs.com
+
 Usage
 -----
 
