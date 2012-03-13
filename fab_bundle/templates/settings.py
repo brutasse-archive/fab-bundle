@@ -24,24 +24,6 @@ MEDIA_ROOT = '{{ media_root }}'
 MEDIA_URL = BASE_URL + '/media/'
 
 {% if staticfiles %}
-# Staticfiles with cached storage if available
-if 'django.contrib.staticfiles' in INSTALLED_APPS:
-    STATICFILES_FINDERS = (
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    )
-    if django.VERSION >= (1, 4):
-        STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
-elif 'staticfiles' in INSTALLED_APPS:
-    STATICFILES_FINDERS = (
-        'staticfiles.finders.FileSystemFinder',
-        'staticfiles.finders.AppDirectoriesFinder',
-    )
-
-    import staticfiles
-    if staticfiles.__version__ >= (1, 1):
-        STATICFILES_STORAGE = 'staticfiles.storage.CachedStaticFilesStorage'
-
 STATIC_ROOT = '{{ static_root }}'
 STATIC_URL = BASE_URL + '/static/'
 ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
@@ -75,7 +57,7 @@ SENTRY_DSN = '{{ sentry_dsn }}'
 
 {% if email %}
 EMAIL_SUBJECT_PREFIX = '[{{ http_host }}] '
-SERVER_EMAIL = '{{ email.from }}'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = '{{ email.from }}'
 EMAIL_HOST = '{{ email.host }}'
 {% if email.user %}EMAIL_HOST_USER = '{{ email.user }}'{% endif %}
 {% if email.password %}EMAIL_HOST_PASSWORD = '{{ email.password }}'{% endif %}
