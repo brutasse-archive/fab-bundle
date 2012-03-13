@@ -13,7 +13,6 @@ on a single server (although you can scale vertically).
 Almost everything here is implemented, a couple of things are still missing:
 
 * Celery
-* Nashvegas migrations
 * ``vendor/`` packages
 * Bundle destruction
 * Log rotation
@@ -175,6 +174,14 @@ Only Nashvegas is currently supported.
     def production():
         # ...
         env.migrations = 'nashvegas'
+
+Note that you need to provide the path to your migrations in
+``NASHVEGAS_MIGRATIONS_DIRECTORY``, for instance in your base settings::
+
+    NASHVEGAS_MIGRATIONS_DIRECTORY = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        'migrations',
+    )
 
 Staticfiles
 ```````````

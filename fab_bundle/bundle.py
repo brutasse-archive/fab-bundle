@@ -76,10 +76,24 @@ def deploy(force_version=None):
         run(('createdb -U postgres -T template_postgis '
              '-E UTF8 %s') % bundle_name)
 
-    if 'migrations' in env and env.migrations == 'nashvegas':
-        # TODO run some migrations
-        pass
-    manage('syncdb')
+    if 'migrations' in env:
+        if env.migrations != 'nashvegas':
+            die("%s is not supported for migrations." % env.migrations)
+        manage('upgradedb -l', noinput=False)  # This creates the migration
+                                               # tables
+
+        installed = run('psql -U postgres %s -c "select * from '
+                        'nashvegas_migration;"' % bundle_name)
+        installed = '0 rows' not in installed
+        if installed:
+            manage('upgradedb -e', noinput=False)
+        else:
+            # 1st deploy, force syncdb and seed migrations.
+            manage('syncdb')
+            manage('upgradedb -s', noinput=False)
+    else:
+        manage('syncdb')
+
     if env.staticfiles:
         manage('collectstatic')
 
@@ -136,8 +150,9 @@ def destroy():
     pass
 
 
-def manage(command):
+def manage(command, noinput=True):
     """Runs a management command"""
-    run('%s/env/bin/django-admin.py %s --noinput --settings=settings' % (
-        env.bundle_root, command,
+    noinput = '--noinput' if noinput else ''
+    run('%s/env/bin/django-admin.py %s %s --settings=settings' % (
+        env.bundle_root, command, noinput,
     ))
