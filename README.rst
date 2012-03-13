@@ -250,6 +250,14 @@ environment, set them as a string in ``env.settings``::
 Make sure there is no indentation, the code must be valid top-level python
 code. Custom settings are appended to the default ones.
 
+Cache number
+````````````
+
+If you have several bundles on the same server and they use cache, you may
+want to specify the ID of the redis DB to use::
+
+    env.cache = 1
+
 Rolling back
 ------------
 
