@@ -69,10 +69,14 @@ def packages():
     packages = [
         'build-essential',
         'libjpeg62-dev',
+        'libjpeg8',
+        'libfreetype6',
+        'libfreetype6-dev',
         'python-dev',
         'python-virtualenv',
         'libxml2-dev',
         'libxslt-dev',
+        'libplist-utils',
 
         'postfix',
 
