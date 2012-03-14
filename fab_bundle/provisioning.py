@@ -1,7 +1,7 @@
 """
 Provisioning tasks
 """
-from fabric.api import env, run, sudo, task
+from fabric.api import env, run, sudo, task, cd
 from fabric.context_managers import settings
 from fabric.contrib.files import exists
 
@@ -101,13 +101,14 @@ def packages():
     sudo('apt-get -y install %s' % ' '.join(packages))
 
     # Fixes so that PIL recognizes the correct libraries. f7u12.
-    if not exists('/usr/lib/libz.so'):
-        for source in ('/usr/lib/i386-linux-gnu/libz.so',
-                       '/usr/lib/x86_64-linux-gnu/libz.so'):
-            if exists(source):
-                with cd('/usr/lib'):
-                    sudo('ln -s %s .' % source)
-                break
+    for lib in ['libz', 'libjpeg', 'libfreetype']:
+        if not exists('/usr/lib/%s.so' % lib):
+            for source in ('/usr/lib/i386-linux-gnu/%s.so' % lib,
+                           '/usr/lib/x86_64-linux-gnu/%s.so' % lib):
+                if exists(source):
+                    with cd('/usr/lib'):
+                        sudo('ln -s %s .' % source)
+                    break
 
 
 def postgres():
