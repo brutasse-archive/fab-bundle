@@ -31,6 +31,7 @@ Stack
 * Sentry, using a remote sentry server
 * GIS-ready by default
 * HTTPS handling with A grade from ssllabs.com
+* XSendfile support
 
 Usage
 -----
@@ -257,6 +258,31 @@ If you have several bundles on the same server and they use cache, you may
 want to specify the ID of the redis DB to use::
 
     env.cache = 1
+
+XSendfile
+`````````
+
+Nginx has the ability to serve private files and leave your upstream server
+decide whether the file should be served or not via a header. This is called
+`XSendfile`_
+
+.. _XSendfile: http://wiki.nginx.org/XSendfile
+
+To make this work with fab-bundle, set env.xsendfile to the list of locations
+you want to protect::
+
+    env.xsendfile = [
+        '/media/private/',
+        '/media/other/',
+    ]
+
+Note that your ``MEDIA_ROOT`` is served under the ``/media/`` URL prefix.
+
+Then in your view::
+
+    response = HttpResponse(mimetype='application/octet-stream')
+    response['X-Accel-Redirect'] = '/media/private/file-one.zip'
+    return response
 
 Rolling back
 ------------
