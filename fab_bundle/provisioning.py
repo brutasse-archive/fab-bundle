@@ -78,8 +78,6 @@ def packages():
         'libxslt-dev',
         'libplist-utils',
 
-        'postfix',
-
         'nginx',
 
         'supervisor',

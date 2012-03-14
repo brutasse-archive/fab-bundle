@@ -149,8 +149,7 @@ Sending Email
             'password': 'yay',
         }
 
-You can also set the ``'tls'``, ``'port'`` and ``'backend'`` keys. You can use
-localhost if you want, ``postfix`` is installed.
+You can also set the ``'tls'``, ``'port'`` and ``'backend'`` keys.
 
 Postgres version
 ````````````````
