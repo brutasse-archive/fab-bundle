@@ -82,8 +82,8 @@ def deploy(force_version=None):
         manage('upgradedb -l', noinput=False)  # This creates the migration
                                                # tables
 
-        installed = run('psql -U postgres %s -c "select * from '
-                        'nashvegas_migration;"' % bundle_name)
+        installed = run('psql -U postgres %s -c "select id from '
+                        'nashvegas_migration limit 1;"' % bundle_name)
         installed = '0 rows' not in installed
         if installed:
             manage('upgradedb -e', noinput=False)
