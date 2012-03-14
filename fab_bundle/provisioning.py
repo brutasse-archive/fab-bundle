@@ -100,6 +100,15 @@ def packages():
     ]
     sudo('apt-get -y install %s' % ' '.join(packages))
 
+    # Fixes so that PIL recognizes the correct libraries. f7u12.
+    if not exists('/usr/lib/libz.so'):
+        for source in ('/usr/lib/i386-linux-gnu/libz.so',
+                       '/usr/lib/x86_64-linux-gnu/libz.so'):
+            if exists(source):
+                with cd('/usr/lib'):
+                    sudo('ln -s %s .' % source)
+                break
+
 
 def postgres():
     """
