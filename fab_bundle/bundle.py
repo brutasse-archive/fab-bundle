@@ -34,7 +34,8 @@ def deploy(force_version=None):
     dist = sorted(dists, key=lambda d: map(int_or_s,
                                            version_string(d).split('.')))[-1]
     version = force_version or version_string(dist)
-    requirement = dist.replace('-%s.tar.gz' % version, '==%s' % version)
+    dist_name = dist.rsplit('-', 1)[0]
+    requirement = '%s==%s' % (dist_name, version)
 
     run('mkdir -p packages')
     if not exists('packages/%s' % dist):
