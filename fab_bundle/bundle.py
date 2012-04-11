@@ -124,7 +124,7 @@ def deploy(force_version=None):
     if changed:  # TODO detect if the certs have changed
         sudo('/etc/init.d/nginx reload')
 
-    # Supervisor task(s) -- gunicorn + celeryd
+    # Supervisor task(s) -- gunicorn + rq
     changed = template('supervisor.conf',
                        '%s/conf/supervisor.conf' % bundle_root)
     with cd('/etc/supervisor/conf.d'):

@@ -12,7 +12,7 @@ on a single server (although you can scale vertically).
 
 Almost everything here is implemented, a couple of things are still missing:
 
-* Celery
+* Tasks via RQ
 * ``vendor/`` packages
 * Bundle destruction
 * Log rotation
@@ -24,7 +24,7 @@ Stack
 
 * Python (duh)
 * PostgreSQL
-* Redis (celery tasks, cache backend)
+* Redis (RQ tasks, cache backend)
 * Gunicorn
 * Supervisor
 * Nginx
@@ -224,14 +224,16 @@ Note that it will be passed to pip's ``--index-url`` argument, not
 ``--find-links`` or ``--extra-index-url`` so you need all your dependencies
 here.
 
-Celery tasks
-````````````
+RQ tasks
+````````
 
-Celery support (via Redis) is opt-in::
+`RQ`_ support is opt-in::
 
     def production():
         # ...
-        env.celery = True
+        env.rq = True
+
+.. _RQ: https://github.com/nvie/rq
 
 Custom settings
 ```````````````
