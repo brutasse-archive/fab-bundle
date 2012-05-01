@@ -61,7 +61,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL = '{{ email.from }}'
 EMAIL_HOST = '{{ email.host }}'
 {% if email.user %}EMAIL_HOST_USER = '{{ email.user }}'{% endif %}
 {% if email.password %}EMAIL_HOST_PASSWORD = '{{ email.password }}'{% endif %}
-{% if email.port %}EMAIL_PORT = '{{ email.port }}'{% endif %}
+{% if email.port %}EMAIL_PORT = {{ email.port }}{% endif %}
 {% if email.backend %}EMAIL_BACKEND = '{{ email.user }}'{% endif %}
 {% if email.tls %}EMAIL_USE_TLS = True{% endif %}
 {% endif %}
