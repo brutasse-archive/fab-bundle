@@ -68,6 +68,7 @@ EMAIL_HOST = '{{ email.host }}'
 
 SESSION_COOKIE_HTTPONLY = True{% if ssl_cert %}
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True{% endif %}
+CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https'){% endif %}
 
 {% if settings %}{{ settings|safe }}{% endif %}
