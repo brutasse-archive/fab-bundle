@@ -76,11 +76,11 @@ def deploy(force_version=None):
     result = run('psql -U postgres -l|grep UTF8')
     if bundle_name not in result:
         if 'gis' in env and env.gis is False:
-            template = 'template0'
+            db_template = 'template0'
         else:
-            template = 'template_postgis'
+            db_template = 'template_postgis'
         run(('createdb -U postgres -T %s '
-             '-E UTF8 %s') % (template, bundle_name)
+             '-E UTF8 %s') % (db_template, bundle_name))
 
     if 'migrations' in env:
         if env.migrations != 'nashvegas':
