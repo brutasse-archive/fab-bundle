@@ -12,13 +12,6 @@ SEND_BROKEN_LINK_EMAILS = True
 
 SECRET_KEY = '{{ secret_key }}'
 
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
-)
-
 BASE_URL = 'http{% if ssl_cert %}s{% endif %}://{{ http_host }}'
 MEDIA_ROOT = '{{ media_root }}'
 MEDIA_URL = BASE_URL + '/media/'
