@@ -37,9 +37,10 @@ def deploy(force_version=None):
     dist_name = dist.rsplit('-', 1)[0]
     requirement = '%s==%s' % (dist_name, version)
 
-    run('mkdir -p packages')
-    if not exists('packages/%s' % dist):
-        put('dist/%s' % dist, 'packages/%s' % dist)
+    packages = env.bundle_root + '/packages'
+    run('mkdir -p %s' % packages)
+    if not exists('%s/%s' % (packages, dist)):
+        put('dist/%s' % dist, '%s/%s' % (packages, dist))
 
     # TODO: vendor/ packages
     freeze = run('%s/env/bin/pip freeze' % bundle_root).split()
@@ -48,7 +49,7 @@ def deploy(force_version=None):
             "a new release." % requirement)
 
     cmd = '%s/env/bin/pip install -U %s gunicorn --find-links file://%s' % (
-        bundle_root, requirement, run('pwd') + '/packages'
+        bundle_root, requirement, packages
     )
     if 'index_url' in env:
         cmd += ' --index-url %(index_url)s' % env
