@@ -100,7 +100,7 @@ Reporting
 `````````
 
 Every day you get an email with the load average, out-of-date packages and
-disk space available on your machine. This email is sent to ``env.admin``:
+disk space available on your machine. This email is sent to ``env.admin``::
 
     env.admin = 'email@example.com'
 
