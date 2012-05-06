@@ -15,7 +15,6 @@ Almost everything here is implemented, a couple of things are still missing:
 * Tasks via RQ
 * ``vendor/`` packages
 * Bundle destruction
-* Log rotation
 * Symlinks for easy backups
 
 Stack

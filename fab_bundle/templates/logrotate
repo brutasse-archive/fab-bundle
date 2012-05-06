@@ -1,0 +1,13 @@
+{{ bundle_root }}/log/*.log {
+	daily
+	missingok
+	rotate 183
+	compress
+	notifempty
+	create 640 {{ user }} {{ user }}
+	sharedscripts
+	dateext
+	postrotate
+		killall -s USR1 nginx
+	endscript
+}

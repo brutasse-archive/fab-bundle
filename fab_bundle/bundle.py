@@ -112,6 +112,11 @@ def deploy(force_version=None):
         # Make sure to deactivate tasks if the cron section is removed
         sudo('rm -f %(bundle_root)s/conf/cron /etc/cron.d/%(app)s' % env)
 
+    # Log rotation
+    logrotate = '/etc/logrotate.d/%(app)s' % env
+    template('logrotate', logrotate, use_sudo=True)
+    sudo('chown root:root %s' % logrotate)
+
     # Nginx vhost
     changed = template('nginx.conf', '%s/conf/nginx.conf' % bundle_root)
     with cd('/etc/nginx/sites-available'):
