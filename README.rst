@@ -15,7 +15,6 @@ Almost everything here is implemented, a couple of things are still missing:
 * Tasks via RQ
 * ``vendor/`` packages
 * Bundle destruction
-* Symlinks for easy backups
 
 Stack
 -----
@@ -217,9 +216,10 @@ Commands are run from your bundle root. This folder contains:
 
 * the virtualenv in ``env/``
 * the nginx, supervisor, etc config in ``conf/``
-* the nginx and gunicorn logs in ``logs/``
+* the nginx, supervisor and gunicorn logs in ``log/``
 * the static and media files in ``public/``
 * the settings and wsgi files, ``settings.py`` and ``wsgi.py``
+* the python packages in ``packages/``
 
 Private index server
 ````````````````````
@@ -301,6 +301,17 @@ Rolling back
 Had a bad deploy? It happens. Rollback to a previous version, let's say 1.2::
 
     fab production deploy:1.2
+
+Backing up
+----------
+
+Databases are dumped every day, you can sync them as well as your media files
+using a script such as::
+
+    #/ /bin/sh
+    RSYNC="rsync -avz -e ssh"
+    $RSYNC <host>:dbs .
+    $RSYNC <host>:bundles/<http-domain>/public/media .
 
 Cleaning up
 -----------
