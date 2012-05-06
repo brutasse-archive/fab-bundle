@@ -16,7 +16,6 @@ Almost everything here is implemented, a couple of things are still missing:
 * ``vendor/`` packages
 * Bundle destruction
 * Log rotation
-* Daily DB snapshots
 * Symlinks for easy backups
 
 Stack
@@ -60,6 +59,7 @@ Create a ``fabfile.py`` file in your project root::
         env.user = 'bruno'
         env.hosts = ['example.com']
         env.key_filename = '/path/to/id_rsa'
+        env.admin = 'email@example.com'
 
         # Nginx
         env.http_host = 'foo.example.com'
@@ -96,6 +96,14 @@ Should you ever need a plain shell, do::
 
 Configuration
 -------------
+
+Reporting
+`````````
+
+Every day you get an email with the load average, out-of-date packages and
+disk space available on your machine. This email is sent to ``env.admin``:
+
+    env.admin = 'email@example.com'
 
 HTTPS
 `````
@@ -151,8 +159,8 @@ Sending Email
 
 You can also set the ``'tls'``, ``'port'`` and ``'backend'`` keys.
 
-Postgres version
-````````````````
+Postgres
+````````
 
 Fab-bundle will try to install postgres 9.1. If it's not available on your
 system, you'll need to check which version you have, make sure you pick the
@@ -163,6 +171,9 @@ one that works with postgis as well::
 This outputs stuff like ``postgresql-8.4-postgis``. Then set::
 
     env.pg_version = '8.4'
+
+You will get daily DB backups in ``$HOME/dbs``, they're kept for 7 days and
+then rotated, so it's up to you to back them up offsite if you need to.
 
 Migrations
 ``````````

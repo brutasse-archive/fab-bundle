@@ -1,0 +1,2 @@
+@daily {{ user }} /home/{{ user }}/bin/backup_dbs.py
+@daily root /home/{{ user }}/bin/check.py

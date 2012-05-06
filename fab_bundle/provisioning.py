@@ -1,6 +1,8 @@
 """
 Provisioning tasks
 """
+from textwrap import dedent
+
 from fabric.api import env, run, sudo, task, cd
 from fabric.context_managers import settings
 from fabric.contrib.files import exists
@@ -33,6 +35,8 @@ def bootstrap():
     packages()
     btw("Setting up postgres...")
     postgres()
+    btw("Installing maintenance cron jobs")
+    cron()
     btw("Enabling nginx and supervisor")
     nginx()
     supervisor()
@@ -113,6 +117,13 @@ def postgres():
     """
     Configures Postgres.
     """
+    # Set up daily DB dumps
+    run('mkdir -p dbs')
+    run('mkdir -p bin')
+    backup = '/home/%(user)s/bin/backup_dbs.py' % env
+    template('backup_dbs.py', backup)
+    run('chmod +x %s' % backup)
+
     pg_version = run('ls /etc/postgresql').split()[0]
     pg_hba = '/etc/postgresql/%s/main/pg_hba.conf' % pg_version
 
@@ -154,3 +165,14 @@ def supervisor():
     res = sudo('/etc/init.d/supervisor status || true')
     if 'not running' in res:
         sudo('/etc/init.d/supervisor start')
+
+
+def cron():
+    health_check = '/home/%(user)s/bin/check.py' % env
+    template('check.py', health_check)
+    run('chmod +x %s' % health_check)
+
+    target = '/etc/cron.d/fabbundle'
+    template('admincron', target, use_sudo=True)
+    sudo('chown root:root %s' % target)
+    sudo('chmod 644 %s' % target)
