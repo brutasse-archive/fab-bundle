@@ -33,6 +33,7 @@ def bootstrap():
     iptables()
     btw("Installing and upgrading packages...")
     packages()
+    pip()
     btw("Setting up postgres...")
     postgres()
     btw("Installing maintenance cron jobs")
@@ -81,6 +82,7 @@ def packages():
         'libxml2-dev',
         'libxslt-dev',
         'libplist-utils',
+        'dnsutils',
 
         'nginx',
 
@@ -113,6 +115,11 @@ def packages():
                     with cd('/usr/lib'):
                         sudo('ln -s %s .' % source)
                     break
+
+
+def pip():
+    run('mkdir -p .pip')
+    template('pip.conf', '.pip/pip.conf')
 
 
 def postgres():
