@@ -295,6 +295,15 @@ Then in your view::
     response['X-Accel-Redirect'] = '/media/private/file-one.zip'
     return response
 
+GIS
+```
+
+Fab-bundle installs the libraries required by geodjango and creates all the
+databases from a spatial template. If you don't need this, you can disable GIS
+support by setting ``env.gis``::
+
+    env.gis = False
+
 Rolling back
 ------------
 

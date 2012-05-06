@@ -75,8 +75,12 @@ def deploy(force_version=None):
     # Do we have a DB?
     result = run('psql -U postgres -l|grep UTF8')
     if bundle_name not in result:
-        run(('createdb -U postgres -T template_postgis '
-             '-E UTF8 %s') % bundle_name)
+        if 'gis' in env and env.gis is False:
+            template = 'template0'
+        else:
+            template = 'template_postgis'
+        run(('createdb -U postgres -T %s '
+             '-E UTF8 %s') % (template, bundle_name)
 
     if 'migrations' in env:
         if env.migrations != 'nashvegas':

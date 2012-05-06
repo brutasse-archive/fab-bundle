@@ -90,16 +90,18 @@ def packages():
         'postgresql',
         'postgresql-server-dev-%s' % env.pg_version,
 
-        'postgis',
-        'postgresql-%s-postgis' % env.pg_version,
-        'gdal-bin',
-        'libproj-dev',
-        'libgeos-dev',
-
         'redis-server',
 
         'curl',
     ]
+    if 'gis' not in env or env.gis is not False:
+        packages += [
+            'postgis',
+            'postgresql-%s-postgis' % env.pg_version,
+            'gdal-bin',
+            'libproj-dev',
+            'libgeos-dev',
+        ]
     sudo('apt-get -y install %s' % ' '.join(packages))
 
     # Fixes so that PIL recognizes the correct libraries. f7u12.
@@ -132,6 +134,8 @@ def postgres():
         btw("Updated pg_hba.conf, reloading postgres...")
         template('pg_hba.conf', pg_hba, use_sudo=True)
         sudo('/etc/init.d/postgresql restart')
+    if 'gis' in env and env.gis is False:
+        return
     templates = run('psql -U postgres -l|grep template')
     if 'template_postgis' in templates:
         return
