@@ -321,6 +321,8 @@ using a script such as::
     RSYNC="rsync -avz -e ssh"
     $RSYNC <host>:dbs .
     $RSYNC <host>:bundles/<http-domain>/public/media .
+    mkdir -p log
+    $RSYNC <host>:bundles/<http-domain>/log/*.gz log
 
 Cleaning up
 -----------
