@@ -65,6 +65,7 @@ Disk space
 
 Mount points:
 %(disks)s
+
 Out-of-date packages
 --------------------
 
