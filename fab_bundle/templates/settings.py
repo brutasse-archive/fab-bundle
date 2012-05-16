@@ -19,7 +19,6 @@ MEDIA_URL = BASE_URL + '/media/'
 {% if staticfiles %}
 STATIC_ROOT = '{{ static_root }}'
 STATIC_URL = BASE_URL + '/static/'
-ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 {% endif %}
 
 {% if cache >= 0 %}
