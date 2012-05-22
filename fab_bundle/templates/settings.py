@@ -1,5 +1,4 @@
 from {{ base_settings }} import *
-import django
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
