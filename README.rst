@@ -95,6 +95,15 @@ Should you ever need a plain shell, do::
 Configuration
 -------------
 
+Python requirements
+```````````````````
+
+You need to add the following packages to your environment:
+
+* django-redis-cache
+* psycopg2
+* redis
+
 Reporting
 `````````
 
