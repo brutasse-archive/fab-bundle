@@ -49,7 +49,7 @@ SENTRY_DSN = '{{ sentry_dsn }}'
 {% if email %}
 EMAIL_SUBJECT_PREFIX = '[{{ http_host }}] '
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = '{{ email.from }}'
-EMAIL_HOST = '{{ email.host }}'
+{% if email.host %}EMAIL_HOST = '{{ email.host }}'{% endif %}
 {% if email.user %}EMAIL_HOST_USER = '{{ email.user }}'{% endif %}
 {% if email.password %}EMAIL_HOST_PASSWORD = '{{ email.password }}'{% endif %}
 {% if email.port %}EMAIL_PORT = {{ email.port }}{% endif %}
