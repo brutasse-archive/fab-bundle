@@ -42,7 +42,14 @@ def deploy(force_version=None):
     if not exists('%s/%s' % (packages, dist)):
         put('dist/%s' % dist, '%s/%s' % (packages, dist))
 
-    # TODO: vendor/ packages
+    has_vendor = 'vendor' in os.listdir(os.getcwd())
+    if has_vendor:
+        local_files = set(os.listdir(os.path.join(os.getcwd(), 'vendor')))
+        uploaded = set(run('ls %s' % packages).split())
+        diff = local_files - uploaded
+        for file_name in diff:
+            put('vendor/%s' % file_name, '%s/%s' % (packages, file_name))
+
     freeze = run('%s/env/bin/pip freeze' % bundle_root).split()
     if requirement in freeze and force_version is None:
         die("%s is already deployed. Increment the version number to deploy "

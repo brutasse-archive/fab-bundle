@@ -13,7 +13,6 @@ on a single server (although you can scale vertically).
 Almost everything here is implemented, a couple of things are still missing:
 
 * Tasks via RQ
-* ``vendor/`` packages
 * Bundle destruction
 
 Stack
