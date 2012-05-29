@@ -12,7 +12,6 @@ on a single server (although you can scale vertically).
 
 Almost everything here is implemented, a couple of things are still missing:
 
-* Tasks via RQ
 * Bundle destruction
 
 Stack
@@ -252,6 +251,8 @@ RQ tasks
         env.rq = True
 
 .. _RQ: https://github.com/nvie/rq
+
+You still need to specify the python requirements yourself.
 
 Custom settings
 ```````````````

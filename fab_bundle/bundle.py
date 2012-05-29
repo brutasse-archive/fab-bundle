@@ -147,6 +147,15 @@ def deploy(force_version=None):
     with cd('/etc/supervisor/conf.d'):
         sudo('ln -sf %s/conf/supervisor.conf %s.conf' % (bundle_root,
                                                          bundle_name))
+
+    if env.rq:
+        rq_changed = template('rq.conf',
+                              '%s/conf/rq.conf' % bundle_root)
+        with cd('/etc/supervisor/conf.d'):
+            sudo('ln -sf %s/conf/rq.conf %s_worker.conf' % (bundle_root,
+                                                            bundle_name))
+        changed = changed or rq_changed
+
     if changed:
         sudo('supervisorctl update')
     run('kill -HUP `pgrep gunicorn`')
