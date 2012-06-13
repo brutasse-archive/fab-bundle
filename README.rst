@@ -252,7 +252,16 @@ RQ tasks
 
 .. _RQ: https://github.com/nvie/rq
 
-You still need to specify the python requirements yourself.
+You still need to specify the python requirements yourself. Note that the
+``rqworker`` will use the redis database specified in ``env.cache``, and the
+following setting will be added (the number will vary depending on
+``env.cache``::
+
+    RQ = {
+        'db': 0,
+    }
+
+Make sure you use the DB id from this setting when you enqueue new tasks.
 
 Custom settings
 ```````````````

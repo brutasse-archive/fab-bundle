@@ -148,7 +148,9 @@ def deploy(force_version=None):
         sudo('ln -sf %s/conf/supervisor.conf %s.conf' % (bundle_root,
                                                          bundle_name))
 
-    if env.rq:
+    if 'rq' in env and env.rq:
+        # RQ forks processes and they load the latest version of the code.
+        # No need to restart the worker **unless** RQ has been updated (TODO).
         rq_changed = template('rq.conf',
                               '%s/conf/rq.conf' % bundle_root)
         with cd('/etc/supervisor/conf.d'):

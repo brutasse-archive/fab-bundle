@@ -32,6 +32,11 @@ CACHES = {
 }
 MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
+{% if rq %}
+RQ = {
+    'db': {{ cache }},
+}
+{% endif %}
 {% endif %}
 
 DATABASES = {
