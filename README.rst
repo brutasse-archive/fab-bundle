@@ -326,12 +326,14 @@ Backing up
 Databases are dumped every day, you can sync them as well as your media files
 using a script such as::
 
-    #/ /bin/sh
+    #! /bin/sh
+    mkdir -p log dbs
+    DOMAIN="bundle_domain"
+    HOST="ssh_host_address"
     RSYNC="rsync -avz -e ssh"
-    $RSYNC <host>:dbs .
-    $RSYNC <host>:bundles/<http-domain>/public/media .
-    mkdir -p log
-    $RSYNC <host>:bundles/<http-domain>/log/*.gz log
+    $RSYNC $HOST:dbs/*/$DOMAIN* dbs
+    $RSYNC $HOST:bundles/$DOMAIN/public/media .
+    $RSYNC $HOST:bundles/$DOMAIN/log/*.gz log
 
 Cleaning up
 -----------
