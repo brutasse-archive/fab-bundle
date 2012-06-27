@@ -149,14 +149,32 @@ def deploy(force_version=None):
                                                          bundle_name))
 
     if 'rq' in env and env.rq:
+        changed = True  # Always supervisorctl update
+
         # RQ forks processes and they load the latest version of the code.
         # No need to restart the worker **unless** RQ has been updated (TODO).
-        rq_changed = template('rq.conf',
-                              '%s/conf/rq.conf' % bundle_root)
-        with cd('/etc/supervisor/conf.d'):
-            sudo('ln -sf %s/conf/rq.conf %s_worker.conf' % (bundle_root,
-                                                            bundle_name))
-        changed = changed or rq_changed
+        for worker_id in range(env.rq['workers']):
+            env.worker_id = worker_id
+            rq_changed = template(
+                'rq.conf', '%s/conf/rq%s.conf' % (bundle_root, worker_id),
+            )
+            with cd('/etc/supervisor/conf.d'):
+                sudo('ln -sf %s/conf/rq%s.conf %s_worker%s.conf' % (
+                    bundle_root, worker_id, bundle_name, worker_id,
+                ))
+
+        # Scale down workers if the number decreased
+        workers = run('ls /etc/supervisor/conf.d/%s_worker*.conf' % bundle_name)
+        workers_conf = run('ls %s/conf/rq*.conf' % bundle_root)
+        to_delete = []
+        for w in workers.split():
+            if int(w.split('%s_worker' % bundle_name, 1)[1][:-5]) >= env.rq['workers']:
+                to_delete.append(w)
+        for w in workers_conf.split():
+            if int(w.split(bundle_name, 1)[1][8:-5]) >= env.rq['workers']:
+                to_delete.append(w)
+        if to_delete:
+            sudo('rm %s' % " ".join(to_delete))
 
     if changed:
         sudo('supervisorctl update')

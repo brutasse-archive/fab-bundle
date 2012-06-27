@@ -244,11 +244,13 @@ here.
 RQ tasks
 ````````
 
-`RQ`_ support is opt-in::
+`RQ`_ support is opt-in. You can set the number of workers like this::
 
     def production():
         # ...
-        env.rq = True
+        env.rq = {
+            'workers': 1,
+        }
 
 .. _RQ: https://github.com/nvie/rq
 
