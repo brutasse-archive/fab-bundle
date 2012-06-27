@@ -55,7 +55,7 @@ def deploy(force_version=None):
         die("%s is already deployed. Increment the version number to deploy "
             "a new release." % requirement)
 
-    cmd = '%s/env/bin/pip install -U %s gunicorn gevent greenlet --find-links file://%s' % (
+    cmd = '%s/env/bin/pip install -U %s gunicorn gevent greenlet setproctitle --find-links file://%s' % (
         bundle_root, requirement, packages
     )
     if 'index_url' in env:
