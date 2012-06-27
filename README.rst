@@ -127,6 +127,16 @@ to be HTTPS-only, with:
 * Permanent redirection from non-SSL to SSL requests
 * HTTPS on static and media serving
 
+Gunicorn
+````````
+
+Gunicorn uses the ``gevent`` worker class, ``gevent`` and ``greenlet`` will be
+installed in your bundle virtualenv.
+
+It also uses 2 workers by default. To change the number of workers, do::
+
+    env.workers = 4
+
 Bundle location
 ```````````````
 

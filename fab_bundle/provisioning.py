@@ -83,6 +83,7 @@ def packages():
         'libxslt-dev',
         'libplist-utils',
         'dnsutils',
+        'libevent-dev',
 
         'nginx',
 

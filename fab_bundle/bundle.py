@@ -55,7 +55,7 @@ def deploy(force_version=None):
         die("%s is already deployed. Increment the version number to deploy "
             "a new release." % requirement)
 
-    cmd = '%s/env/bin/pip install -U %s gunicorn --find-links file://%s' % (
+    cmd = '%s/env/bin/pip install -U %s gunicorn gevent greenlet --find-links file://%s' % (
         bundle_root, requirement, packages
     )
     if 'index_url' in env:
@@ -142,6 +142,8 @@ def deploy(force_version=None):
         sudo('/etc/init.d/nginx reload')
 
     # Supervisor task(s) -- gunicorn + rq
+    if not 'workers' in env:
+        env.workers = 2
     changed = template('supervisor.conf',
                        '%s/conf/supervisor.conf' % bundle_root)
     with cd('/etc/supervisor/conf.d'):
