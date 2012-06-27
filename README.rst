@@ -228,6 +228,9 @@ Commands are run from your bundle root. This folder contains:
 * the settings and wsgi files, ``settings.py`` and ``wsgi.py``
 * the python packages in ``packages/``
 
+Cron commands' stdout and stderr are appended to
+``<bundle_root>/log/cron.log``.
+
 Private index server
 ````````````````````
 
