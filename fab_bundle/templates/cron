@@ -1,2 +1,2 @@
-{% for schedule, command in cron %}{{ schedule }} {{ user }} cd {{ bundle_root }} && {{ command|safe }}
+{% for schedule, command in cron %}{{ schedule }} {{ user }} cd {{ bundle_root }} && {{ command|safe }} >> {{ bundle_root }}/log/cron.log 2>&1
 {% endfor %}
