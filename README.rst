@@ -32,9 +32,8 @@ Usage
 -----
 
 * Package your django project, you should be able to pip install it from a
-  private location. Your package should contain base default settings that
-  ``fab-bundle`` will *extend*, for instance in
-  ``project/default_settings.py``.
+  private location. Your package should be able to configure itself completely
+  using environment variables.
 
 * Put your private requirements (if any) into a ``vendor/`` directory, as
   python packages.
@@ -61,8 +60,12 @@ Create a ``fabfile.py`` file in your project root::
         env.http_host = 'foo.example.com'
 
         # Django
-        env.base_settings = 'project.default_settings'
-        env.secret_key = 'your private secret confidential key'
+        env.wsgi = 'project.wsgi:application'
+        env.env = {
+            'SECRET_KEY': 'production secret key',
+            'DATABASE_URL': 'postgis://localhost:5432/example.com',
+            '…': 'etc etc',
+        }
 
 Bootstrap the server setup::
 
@@ -137,6 +140,8 @@ It also uses 2 workers by default. To change the number of workers, do::
 
     env.workers = 4
 
+The WSGI entry point for gunicorn must be configured in ``env.wsgi``.
+
 Bundle location
 ```````````````
 
@@ -147,32 +152,46 @@ Bundles are put in ``$HOME/bundles`` by default. To change this, set
         # ...
         env.bundle_root = '/var/www/bundles'
 
+STATIC and MEDIA files
+``````````````````````
+
+You can configure your application to use the correct locations using the
+``STATIC_ROOT`` and ``MEDIA_ROOT`` environment variables::
+
+    STATIC_ROOT = os.environ['STATIC_ROOT']
+    MEDIA_ROOT = os.environ['MEDIA_ROOT']
+
+These locations are served under the ``/static/`` and ``/media/`` URLs,
+respectively.
+
 Sentry
 ``````
 
-You can use Sentry in remote mode, by adding this to the ``env`` object::
+Set a ``SENTRY_DSN`` environment variable::
 
-    def production():
-        # ...
-        env.sentry_dsn = 'you sentry DSN'
+    env.env = {
+        'SENTRY_DSN': 'https://…',
+    }
 
-Make sure your project itself is configured to use ``raven``.
+Then use ``raven`` directly. By default raven looks for the environment
+variable::
+
+    from raven import Client
+    client = Client()
+    client.captureMessage(stuff)
 
 Sending Email
 `````````````
 
-::
+Expose your email configuration secrets as an environment variable::
 
-    def production():
-        # ...
-        env.email = {
-            'from': 'Example <hi@example.com>',
-            'host': 'smtp.example.com',
-            'user': 'example',
-            'password': 'yay',
-        }
+    env.env = {
+        'FROM_EMAIL': 'Example <hi@example.com>',
+        'EMAIL_URL': 'smtp://user:password@host:587',
+    }
 
-You can also set the ``'tls'``, ``'port'`` and ``'backend'`` keys.
+Then make your application configure its email backend using that environment
+variable.
 
 Postgres
 ````````
@@ -190,6 +209,18 @@ This outputs stuff like ``postgresql-8.4-postgis``. Then set::
 You will get daily DB backups in ``$HOME/dbs``, they're kept for 7 days and
 then rotated, so it's up to you to back them up offsite if you need to.
 
+To configure your application, set an environment variable::
+
+    env.env = {
+        'DATABASE_URL': 'postgis://postgres:@localhost/example.com',
+    }
+
+Then make your application configure its database backend using that
+environment variable.
+
+For each bundle, you get a database with the bundle's ``http_host`` as
+database name.
+
 Migrations
 ``````````
 
@@ -202,7 +233,7 @@ Only Nashvegas is currently supported.
         env.migrations = 'nashvegas'
 
 Note that you need to provide the path to your migrations in
-``NASHVEGAS_MIGRATIONS_DIRECTORY``, for instance in your base settings::
+``NASHVEGAS_MIGRATIONS_DIRECTORY``, for instance in your settings::
 
     NASHVEGAS_MIGRATIONS_DIRECTORY = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
@@ -226,16 +257,16 @@ To add scheduled tasks::
     def production():
         # ...
         env.cron = (
-            ('*/30 * * * *', './env/bin/django-admin.py command_name --settings=settings'),
+            ('*/30 * * * *', './env/bin/django-admin.py command_name'),
         )
 
 Commands are run from your bundle root. This folder contains:
 
 * the virtualenv in ``env/``
+* the environment variables in ``envdir``
 * the nginx, supervisor, etc config in ``conf/``
 * the nginx, supervisor and gunicorn logs in ``log/``
 * the static and media files in ``public/``
-* the settings and wsgi files, ``settings.py`` and ``wsgi.py``
 * the python packages in ``packages/``
 
 Cron commands' stdout and stderr are appended to
@@ -268,12 +299,16 @@ RQ tasks
 .. _RQ: https://github.com/nvie/rq
 
 You still need to specify the python requirements yourself. Note that the
-``rqworker`` will use the redis database specified in ``env.cache``, and the
-following setting will be added (the number will vary depending on
-``env.cache``::
+``rqworker`` will use the redis database specified in ``env.cache``. You also
+need to pass this number to your application using an environment variable and
+configure the ``RQ`` setting::
+
+    env.env = {
+        'REDIS_URL': 'redis://localhost:6379/2',
+    }
 
     RQ = {
-        'db': 0,
+        'db': int(urlparse.urlparse(os.environ['REDIS_URL']).path[1:]),
     }
 
 Make sure you use the DB id from this setting when you enqueue new tasks.
@@ -281,27 +316,9 @@ Make sure you use the DB id from this setting when you enqueue new tasks.
 Custom settings
 ```````````````
 
-If you need custom settings that are only suited to your production
-environment, set them as a string in ``env.settings``::
-
-    from textwrap import dedent
-
-    def production():
-        # ...
-        env.settings = dedent("""
-            REGISTRATION_OPEN = True
-        """).strip()
-
-Make sure there is no indentation, the code must be valid top-level python
-code. Custom settings are appended to the default ones.
-
-Cache number
-````````````
-
-If you have several bundles on the same server and they use cache, you may
-want to specify the ID of the redis DB to use::
-
-    env.cache = 1
+If you need custom settings, the pattern is the same as with email and
+database settings: define environment variables and parse them in your
+application's settings file.
 
 XSendfile
 `````````

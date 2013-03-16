@@ -1,5 +1,7 @@
 import os
 
+from io import BytesIO
+
 from fabric.api import task, env, run, local, put, cd, sudo
 from fabric.contrib.files import exists
 
@@ -10,15 +12,17 @@ from .utils import die, err, yay, template
 def deploy(force_version=None):
     """Deploys to the current bundle"""
     bundle_name = env.http_host
-    bundle_root = '%s/%s' % (env.get('bundle_root', run('pwd') + '/bundles'),
-                             bundle_name)
+    bundle_root = '{0}/{1}'.format(
+        env.get('bundle_root', run('pwd') + '/bundles'),
+        bundle_name,
+    )
     env.bundle_root = bundle_root
     run('mkdir -p %s/{log,conf,public}' % bundle_root)
 
     # virtualenv, Packages
     if not exists(bundle_root + '/env'):
-        run('virtualenv --no-site-packages %s/env' % bundle_root)
-    run('%s/env/bin/pip install -U pip' % bundle_root)
+        run('virtualenv --no-site-packages {0}/env'.format(bundle_root))
+    run('{0}/env/bin/pip install -U pip'.format(bundle_root))
 
     local('python setup.py sdist')
     dists = [
@@ -26,6 +30,7 @@ def deploy(force_version=None):
                                            'dist')) if d.endswith('.tar.gz')
     ]
     version_string = lambda d: d.rsplit('-', 1)[1][:-7]
+
     def int_or_s(num):
         try:
             return int(num)
@@ -35,49 +40,42 @@ def deploy(force_version=None):
                                            version_string(d).split('.')))[-1]
     version = force_version or version_string(dist)
     dist_name = dist.rsplit('-', 1)[0]
-    requirement = '%s==%s' % (dist_name, version)
+    requirement = '{0}=={1}'.format(dist_name, version)
 
     packages = env.bundle_root + '/packages'
-    run('mkdir -p %s' % packages)
-    if not exists('%s/%s' % (packages, dist)):
-        put('dist/%s' % dist, '%s/%s' % (packages, dist))
+    run('mkdir -p {0}'.format(packages))
+    if not exists('{0}/{1}'.format(packages, dist)):
+        put('dist/{0}'.format(dist), '{0}/{1}'.format(packages, dist))
 
     has_vendor = 'vendor' in os.listdir(os.getcwd())
     if has_vendor:
         local_files = set(os.listdir(os.path.join(os.getcwd(), 'vendor')))
-        uploaded = set(run('ls %s' % packages).split())
+        uploaded = set(run('ls {0}'.format(packages)).split())
         diff = local_files - uploaded
         for file_name in diff:
-            put('vendor/%s' % file_name, '%s/%s' % (packages, file_name))
+            put('vendor/{0}'.format(file_name),
+                '{0}/{1}'.format(packages, file_name))
 
-    freeze = run('%s/env/bin/pip freeze' % bundle_root).split()
+    freeze = run('{0}/env/bin/pip freeze'.format(bundle_root)).split()
     if requirement in freeze and force_version is None:
-        die("%s is already deployed. Increment the version number to deploy "
-            "a new release." % requirement)
+        die("{0} is already deployed. Increment the version number to deploy "
+            "a new release.".format(requirement))
 
-    cmd = '%s/env/bin/pip install -U %s gunicorn gevent greenlet setproctitle --find-links file://%s' % (
-        bundle_root, requirement, packages
-    )
+    cmd = ('{0}/env/bin/pip install -U {1} gunicorn gevent greenlet '
+           'setproctitle --find-links file://{2}'.format(
+               bundle_root, requirement, packages,
+           ))
     if 'index_url' in env:
-        cmd += ' --index-url %(index_url)s' % env
+        cmd += ' --index-url {0}'.format(env.index_url)
     run(cmd)
     env.path = bundle_root
-    python = run('ls %s/env/lib' % bundle_root)
-    template(
-        'path_extension.pth',
-        '%s/env/lib/%s/site-packages/_virtualenv_path_extensions.pth' % (
-            bundle_root, python
-        ),
-    )
 
-    env.media_root = bundle_root + '/public/media'
-    env.static_root = bundle_root + '/public/static'
+    manage_envdir(bundle_root)
+
     if not 'staticfiles' in env:
         env.staticfiles = True
     if not 'cache' in env:
         env.cache = 0  # redis DB
-    template('settings.py', '%s/settings.py' % bundle_root)
-    template('wsgi.py', '%s/wsgi.py' % bundle_root)
 
     # Do we have a DB?
     result = run('psql -U postgres -l|grep UTF8')
@@ -86,17 +84,17 @@ def deploy(force_version=None):
             db_template = 'template0'
         else:
             db_template = 'template_postgis'
-        run(('createdb -U postgres -T %s '
-             '-E UTF8 %s') % (db_template, bundle_name))
+        run('createdb -U postgres -T {0} -E UTF8 {1}').format(db_template,
+                                                              bundle_name)
 
     if 'migrations' in env:
         if env.migrations != 'nashvegas':
-            die("%s is not supported for migrations." % env.migrations)
+            die("{0} is not supported for migrations.".format(env.migrations))
         manage('upgradedb -l', noinput=False)  # This creates the migration
                                                # tables
 
-        installed = run('psql -U postgres %s -c "select id from '
-                        'nashvegas_migration limit 1;"' % bundle_name)
+        installed = run('psql -U postgres {0} -c "select id from '
+                        'nashvegas_migration limit 1;"'.format(bundle_name))
         installed = '0 rows' not in installed
         if installed:
             manage('upgradedb -e', noinput=False)
@@ -157,7 +155,7 @@ def deploy(force_version=None):
         # No need to restart the worker **unless** RQ has been updated (TODO).
         for worker_id in range(env.rq['workers']):
             env.worker_id = worker_id
-            rq_changed = template(
+            template(
                 'rq.conf', '%s/conf/rq%s.conf' % (bundle_root, worker_id),
             )
             with cd('/etc/supervisor/conf.d'):
@@ -166,17 +164,19 @@ def deploy(force_version=None):
                 ))
 
         # Scale down workers if the number decreased
-        workers = run('ls /etc/supervisor/conf.d/%s_worker*.conf' % bundle_name)
-        workers_conf = run('ls %s/conf/rq*.conf' % bundle_root)
+        names = '/etc/supervisor/conf.d/{0}_worker*.conf'.format(bundle_name)
+        workers = run('ls {0}'.format(names))
+        workers_conf = run('ls {0}/conf/rq*.conf'.format(bundle_root))
         to_delete = []
         for w in workers.split():
-            if int(w.split('%s_worker' % bundle_name, 1)[1][:-5]) >= env.rq['workers']:
+            if int(w.split('{0}_worker'.format(bundle_name),
+                           1)[1][:-5]) >= env.rq['workers']:
                 to_delete.append(w)
         for w in workers_conf.split():
             if int(w.split(bundle_name, 1)[1][8:-5]) >= env.rq['workers']:
                 to_delete.append(w)
         if to_delete:
-            sudo('rm %s' % " ".join(to_delete))
+            sudo('rm {0}'.format(" ".join(to_delete)))
 
     if changed:
         sudo('supervisorctl update')
@@ -184,12 +184,12 @@ def deploy(force_version=None):
 
     # All set, user feedback
     ip = run('curl http://ifconfig.me/')
-    dns = run('nslookup %s' % env.http_host)
+    dns = run('nslookup {0}'.format(env.http_host))
     if ip in dns:
         proto = 'https' if 'ssl_cert' in env else 'http'
-        yay("Visit %s://%s" % (proto, env.http_host))
+        yay("Visit {0}://{1}".format(proto, env.http_host))
     else:
-        err("Deployment successful but make sure %s points to %s" % (
+        err("Deployment successful but make sure {0} points to {1}".format(
             env.http_host, ip))
 
 
@@ -199,9 +199,31 @@ def destroy():
     pass
 
 
+def manage_envdir(bundle_root):
+    # Envdir configuration
+    if not 'env' in env:
+        env.env = {}
+    if not 'MEDIA_ROOT' in env.env:
+        env.env['MEDIA_ROOT'] = bundle_root + '/public/media'
+    if not 'STATIC_ROOT' in env.env:
+        env.env['STATIC_ROOT'] = bundle_root + '/public/static'
+
+    envdir = bundle_root + '/envdir'
+    run('mkdir -p {0}'.format(envdir))
+
+    delete = set(run('ls {0}'.format(envdir)).split()) - set(env.env.keys())
+    if delete:
+        run('rm {0}'.format(
+            ' '.join('{0}/{1}'.format(envdir, key) for key in delete)))
+
+    for name, value in env.env.items():
+        path = '{0}/{1}'.format(envdir, name)
+        put(BytesIO(value), path)
+
+
 def manage(command, noinput=True):
     """Runs a management command"""
     noinput = '--noinput' if noinput else ''
-    run('%s/env/bin/django-admin.py %s %s --settings=settings' % (
-        env.bundle_root, command, noinput,
-    ))
+    run('envdir {bundle_root}/envdir {bundle_root}/env/bin/django-admin.py '
+        '{command} {noinput}'.format(bundle_root=env.bundle_root,
+                                     command=command, noinput=noinput))

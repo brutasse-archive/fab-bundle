@@ -84,6 +84,7 @@ def packages():
         'libplist-utils',
         'dnsutils',
         'libevent-dev',
+        'daemontools',
 
         'nginx',
 
